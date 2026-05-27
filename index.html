@@ -820,10 +820,10 @@
 
         <!-- API Key Management Panel -->
         <div class="chat-key-panel" id="chat-key-panel">
-            <h4 class="key-panel-title text-mono">GEMINI_API_NODE_CONFIG</h4>
-            <p class="key-panel-desc">Enter your Gemini API key from Google AI Studio. It is saved locally in your browser and used strictly for REST requests to Google Gemini.</p>
+            <h4 class="key-panel-title text-mono">AI_MODEL_NODE_CONFIG</h4>
+            <p class="key-panel-desc">Paste an API key (OpenAI, Groq, Claude, or Gemini). The correct AI model will be auto-detected securely on your browser.</p>
             <div class="key-input-row">
-                <input type="password" id="api-key-input" class="api-key-input-box" placeholder="Paste AI Studio API Key here...">
+                <input type="password" id="api-key-input" class="api-key-input-box" placeholder="Paste your API Key here...">
                 <button class="btn-key-action save" id="save-key-btn">SAVE</button>
             </div>
             <div class="key-status-row text-mono">
@@ -863,14 +863,13 @@
                     API Key Configuration Required
                 </h5>
                 <p class="warning-card-text">
-                    A free Google Gemini API Key is required to authorize the generative neural models. Get a free key from Google AI Studio and configure it using the API key panel above.
+                    An API Key (OpenAI, Groq, Anthropic, or Gemini) is required to authorize the generative neural models. Securely connect your preferred model using the panel above.
                 </p>
-                <a href="https://aistudio.google.com/" target="_blank" class="btn-get-key text-mono">
-                    <span>GET FREE KEY AT AI STUDIO</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"></path>
-                    </svg>
-                </a>
+                <div class="api-links-row" style="display:flex; gap: 8px; margin-top: 12px; justify-content: center;">
+                    <a href="https://console.groq.com/keys" target="_blank" class="btn-get-key text-mono" style="padding: 6px; font-size: 9px; flex:1;">GROQ</a>
+                    <a href="https://platform.openai.com/api-keys" target="_blank" class="btn-get-key text-mono" style="padding: 6px; font-size: 9px; flex:1;">OPENAI</a>
+                    <a href="https://aistudio.google.com/" target="_blank" class="btn-get-key text-mono" style="padding: 6px; font-size: 9px; flex:1;">GEMINI</a>
+                </div>
             </div>
         </div>
 

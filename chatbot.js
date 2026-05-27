@@ -1,6 +1,6 @@
 /**
  * Power Bull — Spider AI Chatbot Integration
- * Core Logic, Gemini REST API Connector, and UI State Controller
+ * Core Logic, Multi-Provider REST API Connector, and UI State Controller
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -25,8 +25,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // === State Variables ===
     let chatOpen = false;
-    let apiKey = localStorage.getItem("GEMINI_API_KEY") || "";
-    let chatHistory = []; // Stores history in {"role": "user"|"model", "parts": [{"text": "..."}]} format
+    let apiKey = localStorage.getItem("AI_API_KEY") || localStorage.getItem("GEMINI_API_KEY") || "";
+    // Store generic history: [{role: "user" | "assistant", content: "..."}]
+    let chatHistory = []; 
+    let isSending = false;
+    let currentProvider = "UNKNOWN";
+
+    const KEY_MASK = "••••••••••••••••••••••••••••••••";
+
+    // Detect provider immediately if key exists
+    if (apiKey) currentProvider = detectProvider(apiKey);
 
     // === Initialize API Key Status UI ===
     updateApiKeyUI();
@@ -37,12 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
     chatBubble.addEventListener("click", () => {
         chatOpen = true;
         chatContainer.classList.add("active");
-        chatBubble.classList.remove("active"); // Hide bubble when chat is open
+        chatBubble.classList.remove("active");
         scrollToBottom();
         chatInput.focus();
     });
 
-    // Close/Hide Chat window
     chatCloseBtn.addEventListener("click", closeChat);
     chatMinimizeBtn.addEventListener("click", closeChat);
 
@@ -52,36 +59,50 @@ document.addEventListener("DOMContentLoaded", () => {
         chatBubble.classList.add("active");
     }
 
-    // Toggle API Key settings panel
     chatKeyToggleBtn.addEventListener("click", () => {
+        const isOpening = !chatKeyPanel.classList.contains("active");
         chatKeyPanel.classList.toggle("active");
-    });
-
-    // Save API key
-    apiKeySaveBtn.addEventListener("click", () => {
-        const value = apiKeyInput.value.trim();
-        if (value) {
-            apiKey = value;
-            localStorage.setItem("GEMINI_API_KEY", apiKey);
-            updateApiKeyUI();
-            chatKeyPanel.classList.remove("active");
-            addSystemMessage("API Key saved securely in localStorage.");
+        if (isOpening) {
+            apiKeyInput.value = "";
+            apiKeyInput.type = "text";
+            apiKeyInput.placeholder = apiKey ? `Paste new key to replace (${currentProvider})...` : "Paste OpenAI, Groq, Claude, or Gemini Key...";
+            apiKeyInput.focus();
         }
     });
 
-    // Delete API key
+    apiKeySaveBtn.addEventListener("click", () => {
+        const value = apiKeyInput.value.trim();
+        if (!value || value === KEY_MASK) {
+            addSystemMessage("Please paste a valid API key.");
+            return;
+        }
+        
+        apiKey = value;
+        currentProvider = detectProvider(apiKey);
+        
+        if (currentProvider === "UNKNOWN") {
+            addSystemMessage("Warning: Provider not recognized from key format. Assuming OpenAI-compatible format.");
+            currentProvider = "OPENAI_COMPATIBLE";
+        }
+        
+        localStorage.setItem("AI_API_KEY", apiKey);
+        updateApiKeyUI();
+        chatKeyPanel.classList.remove("active");
+        addSystemMessage(`API Key securely saved. Detected Provider: **${currentProvider}**`);
+    });
+
     apiKeyDeleteBtn.addEventListener("click", () => {
         apiKey = "";
+        currentProvider = "UNKNOWN";
+        localStorage.removeItem("AI_API_KEY");
         localStorage.removeItem("GEMINI_API_KEY");
         apiKeyInput.value = "";
         updateApiKeyUI();
         addSystemMessage("API Key cleared.");
     });
 
-    // Send message on click
     chatSendBtn.addEventListener("click", handleUserMessageSend);
 
-    // Send message on Enter key press (without shift)
     chatInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -91,17 +112,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // === Core Chatbot Functions ===
 
-    // Update API Key state UI and warnings
+    function detectProvider(key) {
+        if (key.startsWith("sk-ant-")) return "ANTHROPIC";
+        if (key.startsWith("sk-proj-") || key.startsWith("sk-")) return "OPENAI";
+        if (key.startsWith("gsk_")) return "GROQ";
+        if (key.startsWith("AIza")) return "GEMINI";
+        return "UNKNOWN";
+    }
+
     function updateApiKeyUI() {
         if (apiKey) {
-            apiKeyInput.value = "••••••••••••••••••••••••••••••••";
+            apiKeyInput.value = KEY_MASK;
+            apiKeyInput.type = "password";
             apiKeyStatus.className = "key-status-indicator secured";
-            apiKeyStatus.textContent = "KEY_SECURED";
+            apiKeyStatus.textContent = `SECURED (${currentProvider})`;
             apiKeyMissingWarning.classList.remove("visible");
             chatInput.disabled = false;
             chatSendBtn.disabled = false;
         } else {
             apiKeyInput.value = "";
+            apiKeyInput.type = "text";
             apiKeyStatus.className = "key-status-indicator inactive";
             apiKeyStatus.textContent = "NO_KEY_SET";
             apiKeyMissingWarning.classList.add("visible");
@@ -110,11 +140,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Add a message bubble to the chat viewport
     function appendMessage(role, text) {
         const msgDiv = document.createElement("div");
         msgDiv.className = `chat-message-bubble ${role}`;
-        
         const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         
         msgDiv.innerHTML = `
@@ -129,16 +157,15 @@ document.addEventListener("DOMContentLoaded", () => {
         scrollToBottom();
     }
 
-    // Appends simple informational system alerts
     function addSystemMessage(text) {
         const alertDiv = document.createElement("div");
         alertDiv.className = "chat-system-alert text-mono";
-        alertDiv.textContent = `[SYSTEM] ${text}`;
+        // Let it render markdown strictly for basic formatting like bold
+        alertDiv.innerHTML = `[SYSTEM] ${formatMarkdown(text)}`;
         chatMessagesViewport.appendChild(alertDiv);
         scrollToBottom();
     }
 
-    // Appends dynamic loading placeholder
     function appendTypingIndicator() {
         const indicator = document.createElement("div");
         indicator.className = "chat-message-bubble model typing-indicator-bubble";
@@ -158,79 +185,46 @@ document.addEventListener("DOMContentLoaded", () => {
         scrollToBottom();
     }
 
-    // Removes dynamic loading placeholder
     function removeTypingIndicator() {
         const indicator = document.getElementById("chat-typing-indicator");
-        if (indicator) {
-            indicator.remove();
-        }
+        if (indicator) indicator.remove();
     }
 
-    // Scroll chat window to bottom
     function scrollToBottom() {
-        chatMessagesViewport.scrollTop = chatMessagesViewport.scrollHeight;
+        requestAnimationFrame(() => {
+            chatMessagesViewport.scrollTop = chatMessagesViewport.scrollHeight;
+        });
     }
 
-    // Helper: Escape raw HTML tags to prevent XSS
     function escapeHTML(str) {
-        return str.replace(/&/g, "&amp;")
-                  .replace(/</g, "&lt;")
-                  .replace(/>/g, "&gt;")
-                  .replace(/"/g, "&quot;")
-                  .replace(/'/g, "&#039;");
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    // Helper: Formats basic markdown to present structured answers
     function formatMarkdown(text) {
         if (!text) return "";
-        let html = text;
-        
-        // Escape standard HTML first to prevent code injection
-        html = escapeHTML(html);
-        
-        // Unescape specifically backticks/markdown triggers we formatted
-        // Re-compile code blocks: ```lang ... ```
-        html = html.replace(/```(?:[a-zA-Z]+)?\n([\s\S]*?)```/g, (match, p1) => {
-            return `<pre class="chat-code-block text-mono"><code>${p1.trim()}</code></pre>`;
-        });
-        
-        // Re-compile inline code: `code`
+        let html = escapeHTML(text);
+        html = html.replace(/```(?:[a-zA-Z]+)?\n([\s\S]*?)```/g, (match, p1) => `<pre class="chat-code-block text-mono"><code>${p1.trim()}</code></pre>`);
         html = html.replace(/`([^`]+)`/g, '<code class="chat-inline-code text-mono">$1</code>');
-        
-        // Re-compile bold text: **text**
         html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-        
-        // Re-compile italic text: *text*
         html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
         
-        // Handle list bullet items (* item or - item)
         html = html.split('\n').map(line => {
             let trimmed = line.trim();
             if (trimmed.startsWith('&amp;bull; ') || trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
-                // Strip the bullet marker
-                let content = trimmed.replace(/^(&amp;bull;|\*|-)\s+/, '');
-                return `<li class="chat-list-item">${content}</li>`;
+                return `<li class="chat-list-item">${trimmed.replace(/^(&amp;bull;|\*|-)\s+/, '')}</li>`;
             }
             return line;
         }).join('\n');
 
-        // Wrap list items in <ul>
-        // This is a simple parser, we'll replace sequential <li> items with grouped tags
         html = html.replace(/((?:<li class="chat-list-item">.*?<\/li>\n?)+)/g, '<ul class="chat-list">$1</ul>');
-
-        // Render remaining single newlines as line breaks
         html = html.replace(/\n/g, '<br>');
-        
         return html;
     }
 
-    // === Dynamic Stock Context Grabber ===
     function getScannerContext() {
         try {
             const titleEl = document.getElementById("chart-title");
-            if (!titleEl || !titleEl.innerText) {
-                return null;
-            }
+            if (!titleEl || !titleEl.innerText) return null;
             
             return {
                 symbol: titleEl.innerText,
@@ -248,81 +242,56 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Update Suggestion Chips text based on Selected Stock
     function updateSuggestionChips() {
         const ctx = getScannerContext();
         if (!ctx) return;
 
         suggestionChipsContainer.innerHTML = `
-            <button class="suggestion-chip" data-prompt="Analyze the active ${ctx.symbol} ${ctx.pattern} setup. What is the likelihood of target hitting?">
-                Analyze ${ctx.symbol} ${ctx.pattern} Setup
-            </button>
-            <button class="suggestion-chip" data-prompt="Explain the geometrical mechanics of a ${ctx.pattern} pattern and how it establishes target breakouts.">
-                Explain ${ctx.pattern} Pattern
-            </button>
-            <button class="suggestion-chip" data-prompt="The risk/reward for ${ctx.symbol} is listed as ${ctx.rr}. Review the entry ${ctx.entry}, target ${ctx.target}, and stop-loss ${ctx.stop} for validation.">
-                Verify R/R Parameters
-            </button>
-            <button class="suggestion-chip" data-prompt="Does this ${ctx.pattern} scanner signal fully adhere to SEBI Registered Research Analyst advisory limits?">
-                SEBI Advisory Check
-            </button>
+            <button class="suggestion-chip" data-prompt="Analyze the active ${ctx.symbol} ${ctx.pattern} setup. What is the likelihood of target hitting?">Analyze ${ctx.symbol}</button>
+            <button class="suggestion-chip" data-prompt="Explain the geometrical mechanics of a ${ctx.pattern} pattern and how it establishes target breakouts.">${ctx.pattern} Pattern</button>
+            <button class="suggestion-chip" data-prompt="The risk/reward for ${ctx.symbol} is listed as ${ctx.rr}. Review the entry ${ctx.entry}, target ${ctx.target}, and stop-loss ${ctx.stop} for validation.">Verify R/R</button>
+            <button class="suggestion-chip" data-prompt="Does this ${ctx.pattern} scanner signal fully adhere to SEBI Registered Research Analyst advisory limits?">SEBI Check</button>
         `;
 
-        // Re-attach listeners to suggestion chips
         const chips = suggestionChipsContainer.querySelectorAll(".suggestion-chip");
         chips.forEach(chip => {
             chip.addEventListener("click", () => {
-                const promptText = chip.dataset.prompt;
-                chatInput.value = promptText;
+                if (isSending) return;
+                chatInput.value = chip.dataset.prompt;
                 handleUserMessageSend();
             });
         });
     }
 
-    // === Mutation Observer for Scanner Changes ===
-    // This allows the chatbot suggestions to auto-sync when the dashboard active card shifts
     const scannerTitleEl = document.getElementById("chart-title");
     if (scannerTitleEl) {
-        const observer = new MutationObserver(() => {
-            updateSuggestionChips();
-        });
-        observer.observe(scannerTitleEl, { childList: true, characterData: true, subtree: true });
-        // Run once initially
+        new MutationObserver(updateSuggestionChips).observe(scannerTitleEl, { childList: true, characterData: true, subtree: true });
         updateSuggestionChips();
     }
 
-    // === Sending & Receiving Messages (Gemini API Core) ===
+    // === Multi-Provider API Dispatch ===
 
     async function handleUserMessageSend() {
         const userText = chatInput.value.trim();
-        if (!userText) return;
+        if (!userText || isSending) return;
 
-        // Ensure key is present
         if (!apiKey) {
             chatKeyPanel.classList.add("active");
             return;
         }
 
-        // Display user message in chat UI
+        isSending = true;
+        chatSendBtn.disabled = true;
+
         appendMessage("user", userText);
-        chatInput.value = ""; // Clear input field
-
-        // Push to local chat history for Gemini model conversation context
-        chatHistory.push({
-            "role": "user",
-            "parts": [{"text": userText}]
-        });
-
-        // Show typing indicator loading states
+        chatInput.value = ""; 
+        
+        chatHistory.push({ role: "user", content: userText });
         appendTypingIndicator();
 
-        // Query active context from the pattern scanner
         const ctx = getScannerContext();
-        
-        // System instructions detailing the expert bot profile and real-time dashboard data context
         let systemInstructions = `You are a high-performance, professional SEBI-compliant Stock Market Technical Analyst assistant integrated inside the 'Power Bull — Spider AI Stock Pattern Scanner' terminal.
-Your task is to analyze chart pattern breakouts (e.g., Cup & Handles, Double Bottoms, Bull Flags, Ascending Triangles) and explain trading setups scientifically.
-Keep your tone informative, authoritative, and helpful. Use markdown, lists, and bold text for clarity.
+Your task is to analyze chart pattern breakouts and explain trading setups scientifically. Keep your tone informative, authoritative, and helpful. Use markdown, lists, and bold text for clarity.
 
 REGULATORY GUARDRAIL: You are operating inside a SEBI Registered Research Analyst dashboard (Registration NO: INH200001483). Under SEBI guidelines, always emphasize that your analyses are strictly for educational scanner pattern validation, visual chart studies, and research support. Do not guarantee any specific returns, and do not provide direct buy/sell financial recommendations. Always add a tiny standard SEBI compliance disclaimer at the bottom of highly specific trade answers.`;
 
@@ -341,68 +310,132 @@ When the user asks to analyze the current setup, verify or discuss, actively ref
         }
 
         try {
-            // REST endpoint to Gemini 1.5 Flash
-            const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                "contents": chatHistory,
-                "systemInstruction": {
-                    "parts": [
-                        {"text": systemInstructions}
-                    ]
-                },
-                "generationConfig": {
-                    "temperature": 0.3,
-                    "topK": 40,
-                    "topP": 0.95,
-                    "maxOutputTokens": 1024
-                }
-            };
+            let aiResponseText = "";
 
-            const response = await fetch(apiEndpoint, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error?.message || `HTTP error ${response.status}`);
+            if (currentProvider === "OPENAI" || currentProvider === "GROQ" || currentProvider === "OPENAI_COMPATIBLE") {
+                aiResponseText = await callOpenAICompatible(systemInstructions);
+            } else if (currentProvider === "GEMINI") {
+                aiResponseText = await callGemini(systemInstructions);
+            } else if (currentProvider === "ANTHROPIC") {
+                aiResponseText = await callAnthropic(systemInstructions);
             }
 
-            const resData = await response.json();
-            removeTypingIndicator();
+            if (!aiResponseText) throw new Error("Empty response from AI provider.");
 
-            const aiResponseText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (aiResponseText) {
-                // Display response
-                appendMessage("model", aiResponseText);
-                
-                // Add to history
-                chatHistory.push({
-                    "role": "model",
-                    "parts": [{"text": aiResponseText}]
-                });
-            } else {
-                throw new Error("Empty candidate response returned from Gemini.");
-            }
+            appendMessage("model", aiResponseText);
+            chatHistory.push({ role: "assistant", content: aiResponseText });
 
         } catch (error) {
-            console.error("Gemini Chatbot API connection error:", error);
-            removeTypingIndicator();
+            console.error("AI API connection error:", error);
+            chatHistory.pop(); // Remove user msg from history
             
-            // Pop the last user message from history since the turn failed
-            chatHistory.pop();
+            let userFriendlyError = error.message || "Failed to establish secure communications with AI nodes.";
             
-            let userFriendlyError = "Failed to establish secure communications with Gemini nodes. Please verify your internet connection or check if your API Key is correct.";
-            if (error.message.includes("API key not valid")) {
-                userFriendlyError = "Invalid API Key. Please open the settings panel in the top-right header (API Key icon) and supply a functional Google AI Studio key.";
+            // Helpful hints for CORS or invalid keys
+            if (userFriendlyError.includes("Failed to fetch") && currentProvider === "ANTHROPIC") {
+                userFriendlyError = "Anthropic API blocked the browser request (CORS error). Claude requires a backend proxy to run on web apps securely.";
+            } else if (userFriendlyError.includes("API key not valid") || userFriendlyError.includes("401") || userFriendlyError.includes("invalid_api_key")) {
+                userFriendlyError = "Invalid API Key. Please click the lock icon and paste a valid key for your provider.";
                 chatKeyPanel.classList.add("active");
+            } else if (userFriendlyError.includes("Failed to fetch")) {
+                userFriendlyError = "Network error or CORS block. Ensure you are connected to the internet and the API supports client-side calls.";
             }
             
-            appendMessage("model", `Error: ${userFriendlyError}`);
+            appendMessage("model", `**Connection Error (${currentProvider}):** ${userFriendlyError}`);
+        } finally {
+            removeTypingIndicator();
+            isSending = false;
+            chatSendBtn.disabled = false;
+            chatInput.focus();
         }
+    }
+
+    // --- Provider Specific Adapters ---
+
+    async function callOpenAICompatible(systemPrompt) {
+        const isGroq = currentProvider === "GROQ";
+        const endpoint = isGroq ? "https://api.groq.com/openai/v1/chat/completions" : "https://api.openai.com/v1/chat/completions";
+        const model = isGroq ? "llama-3.1-8b-instant" : "gpt-4o-mini"; // Default models
+        
+        const messages = [{ role: "system", content: systemPrompt }, ...chatHistory];
+        
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({ model, messages, temperature: 0.3 })
+        });
+        
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content;
+    }
+
+    async function callAnthropic(systemPrompt) {
+        // Warning: Anthropic officially blocks browser fetch requests via CORS.
+        const endpoint = "https://api.anthropic.com/v1/messages";
+        
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": apiKey,
+                "anthropic-version": "2023-06-01",
+                "anthropic-dangerous-direct-browser-access": "true" // Required if trying from browser
+            },
+            body: JSON.stringify({
+                model: "claude-3-haiku-20240307",
+                max_tokens: 1024,
+                system: systemPrompt,
+                messages: chatHistory
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.content?.[0]?.text;
+    }
+
+    async function callGemini(systemPrompt) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        
+        // Map generic history to Gemini's specific format
+        const contents = chatHistory.map(msg => ({
+            role: msg.role === "assistant" ? "model" : "user",
+            parts: [{ text: msg.content }]
+        }));
+
+        const payload = {
+            contents,
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+        };
+
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.candidates?.[0]?.finishReason === "SAFETY") {
+            return "The response was blocked by Google Gemini's safety filters.";
+        }
+        return data.candidates?.[0]?.content?.parts?.[0]?.text;
     }
 });
