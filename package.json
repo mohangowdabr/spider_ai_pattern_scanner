@@ -1,0 +1,12 @@
+{
+  "name": "spider-ai-pattern-scanner",
+  "version": "1.0.0",
+  "description": "Power Bull — Spider AI Stock Pattern Scanner",
+  "scripts": {
+    "start": "npx -y serve .",
+    "build": "echo 'No build step needed'"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
