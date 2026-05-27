@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Bull — Spider AI Stock Pattern Scanner</title>
+    <meta name="description" content="Futuristic AI-powered NSE/BSE stock pattern scanner. Uses Vision AI & multi-agent system to scan and validate chart patterns in real-time.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="terminal-dark font-sans selection-cyan">
+    <!-- Real-time Ticker Tape -->
+    <div class="ticker-tape-container" id="ticker-tape">
+        <div class="ticker-tape-track" id="ticker-track">
+            <!-- Dynamically populated via JS -->
+            <div class="ticker-item"><span class="ticker-symbol">RELIANCE</span><span class="ticker-price">₹2,845.50</span><span class="ticker-change up">+1.45%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">TCS</span><span class="ticker-price">₹3,912.10</span><span class="ticker-change up">+0.82%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">HDFCBANK</span><span class="ticker-price">₹1,542.30</span><span class="ticker-change down">-0.45%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">INFY</span><span class="ticker-price">₹1,422.80</span><span class="ticker-change up">+2.15%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">ICICIBANK</span><span class="ticker-price">₹1,114.90</span><span class="ticker-change up">+0.67%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">KOTAKBANK</span><span class="ticker-price">₹1,712.00</span><span class="ticker-change down">-1.10%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">LT</span><span class="ticker-price">₹3,450.40</span><span class="ticker-change up">+1.88%</span></div>
+            <div class="ticker-item"><span class="ticker-symbol">SBIN</span><span class="ticker-price">₹825.25</span><span class="ticker-change up">+0.34%</span></div>
+        </div>
+    </div>
+
+    <!-- Glowing Cyber Grid Overlay (Optional visual effect) -->
+    <div class="cyber-grid" id="bg-grid"></div>
+    <div class="glow-radial-blue"></div>
+    <div class="glow-radial-green"></div>
+
+    <!-- Main Navigation Header -->
+    <header class="main-header glass-nav container">
+        <div class="header-logo">
+            <svg class="logo-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="10" width="80" height="80" rx="15" fill="url(#logo-grad)" stroke="#00ff66" stroke-width="2"/>
+                <path d="M30 65 L45 35 L55 45 L70 25" stroke="#00ff66" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="25" r="5" fill="#00e5ff" class="pulse-point"/>
+                <path d="M25 65 H75" stroke="#ffffff" stroke-width="2" stroke-opacity="0.3"/>
+                <path d="M30 65 V58 M40 65 V45 M50 65 V52 M60 65 V38 M70 65 V28" stroke="#00ff66" stroke-width="2" stroke-opacity="0.5"/>
+                <defs>
+                    <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#070809"/>
+                        <stop offset="1" stop-color="#111418"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <div class="logo-text-wrapper">
+                <h1 class="brand-title">POWER BULL</h1>
+                <p class="brand-tagline">SPIDER AI PATTERN SCANNER</p>
+            </div>
+        </div>
+
+        <nav class="desktop-nav">
+            <a href="#agents" class="nav-link"><span class="nav-number">01.</span> Multi-Agent Pipeline</a>
+            <a href="#dashboard" class="nav-link"><span class="nav-number">02.</span> Live Terminal</a>
+            <a href="#features" class="nav-link"><span class="nav-number">03.</span> AI Capabilities</a>
+            <a href="#api" class="nav-link"><span class="nav-number">04.</span> Developer API</a>
+            <a href="#compliance" class="nav-link"><span class="nav-number">05.</span> SEBI Advisory</a>
+        </nav>
+
+        <div class="header-status">
+            <div class="conn-status-indicator pulse-green"></div>
+            <span class="status-lbl text-mono">FEED: LIVE_WS</span>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+
+        <!-- Hero Section -->
+        <section class="hero-section container relative" id="hero">
+            <!-- Candlestick Background Canvas -->
+            <canvas id="hero-canvas" class="hero-canvas-bg"></canvas>
+            
+            <div class="hero-content">
+                <div class="badge-container">
+                    <span class="cyber-badge neon-green-border">
+                        <span class="cyber-badge-dot"></span>
+                        VISION AI SCANNED NSE / BSE FEEDS
+                    </span>
+                </div>
+                
+                <h2 class="hero-title text-glow">
+                    AI-Powered NSE/BSE <br>
+                    <span class="gradient-text-green-blue">Pattern Scanner</span>
+                </h2>
+                
+                <p class="hero-subtitle">
+                    Detects highly profitable structural chart patterns before traditional mathematical lagging indicators. Fueled by real-time computer vision and a robust cooperative multi-agent node network.
+                </p>
+
+                <div class="hero-ctas">
+                    <a href="#dashboard" class="btn btn-primary btn-glow">
+                        <span>View Live Signals</span>
+                        <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="#api" class="btn btn-secondary">
+                        <span>Explore API Docs</span>
+                    </a>
+                </div>
+
+                <!-- Live Metrics Grid -->
+                <div class="metrics-grid">
+                    <div class="metric-card glass-card">
+                        <div class="metric-glow-border"></div>
+                        <div class="metric-header">
+                            <span class="metric-title text-mono">STOCKS SCANNING</span>
+                            <svg class="metric-icon text-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <div class="metric-value-container">
+                            <span class="metric-val text-mono" id="metric-stocks">000</span>
+                            <span class="metric-suffix text-cyan">+</span>
+                        </div>
+                        <p class="metric-desc">Continuous intraday ticker scans</p>
+                    </div>
+
+                    <div class="metric-card glass-card">
+                        <div class="metric-glow-border"></div>
+                        <div class="metric-header">
+                            <span class="metric-title text-mono">SIGNAL LATENCY</span>
+                            <svg class="metric-icon text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        </div>
+                        <div class="metric-value-container">
+                            <span class="metric-val text-mono" id="metric-latency">0.0</span>
+                            <span class="metric-suffix text-green">s</span>
+                        </div>
+                        <p class="metric-desc">Vision inference & filter speed</p>
+                    </div>
+
+                    <div class="metric-card glass-card">
+                        <div class="metric-glow-border"></div>
+                        <div class="metric-header">
+                            <span class="metric-title text-mono">PATTERN ACCURACY</span>
+                            <svg class="metric-icon text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                        </div>
+                        <div class="metric-value-container">
+                            <span class="metric-val text-mono" id="metric-accuracy">0</span>
+                            <span class="metric-suffix text-green">%</span>
+                        </div>
+                        <p class="metric-desc">SEBI compliance audit success</p>
+                    </div>
+
+                    <div class="metric-card glass-card">
+                        <div class="metric-glow-border"></div>
+                        <div class="metric-header">
+                            <span class="metric-title text-mono">COOPERATIVE AGENTS</span>
+                            <svg class="metric-icon text-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div class="metric-value-container">
+                            <span class="metric-val text-mono" id="metric-agents">0</span>
+                            <span class="metric-suffix text-cyan">AI</span>
+                        </div>
+                        <p class="metric-desc">Autonomous pipeline modules</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Multi-Agent Architecture Section -->
+        <section class="agents-section container" id="agents">
+            <div class="section-header text-center">
+                <span class="section-tag text-mono text-cyan">COOPERATIVE PIPELINE</span>
+                <h3 class="section-title text-glow">Multi-Agent Scanner Architecture</h3>
+                <p class="section-subtitle">
+                    Five dedicated AI agents collaborate in a real-time event-driven loop to process live exchange tickers, generate clean graphical patterns, run visual scanning algorithms, and seal absolute regulatory integrity.
+                </p>
+            </div>
+
+            <!-- Agent Flow Diagram Canvas/Overlay Grid -->
+            <div class="agents-pipeline-container glass-card">
+                <div class="pipeline-flow-lines" id="pipeline-lines-svg">
+                    <!-- SVG flow connections rendered dynamically or fixed with modern look -->
+                    <svg width="100%" height="100%" viewBox="0 0 1000 240" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                        <!-- Connection lines with glow filters -->
+                        <path d="M160 120 H230" stroke="#1f2d3d" stroke-width="4"/>
+                        <path d="M370 120 H440" stroke="#1f2d3d" stroke-width="4"/>
+                        <path d="M580 120 H650" stroke="#1f2d3d" stroke-width="4"/>
+                        <path d="M790 120 H860" stroke="#1f2d3d" stroke-width="4"/>
+                        
+                        <!-- Glowing animated pulses -->
+                        <circle cx="160" cy="120" r="6" fill="#00e5ff" class="pulse-cyan" id="pulse-1"/>
+                        <circle cx="370" cy="120" r="6" fill="#00ff66" class="pulse-green" id="pulse-2"/>
+                        <circle cx="580" cy="120" r="6" fill="#00e5ff" class="pulse-cyan" id="pulse-3"/>
+                        <circle cx="790" cy="120" r="6" fill="#00ff66" class="pulse-green" id="pulse-4"/>
+                    </svg>
+                </div>
+
+                <div class="agents-grid">
+                    <!-- Agent 1 -->
+                    <div class="agent-node glass-card" id="agent-1">
+                        <div class="agent-status-pulse"></div>
+                        <div class="agent-icon-box bg-blue-trans">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7M15 17V7M3 12h18"/></svg>
+                        </div>
+                        <h4 class="agent-title text-mono">01. Data Ingestion</h4>
+                        <div class="agent-details">
+                            <span class="detail-tag text-mono">NSE L-3 Tick Stream</span>
+                            <span class="detail-tag text-mono">OHLCV Resampler</span>
+                        </div>
+                        <p class="agent-body-desc">Consumes raw trading feeds directly from BSE/NSE. Performs microseconds-level resampling and filters spikes.</p>
+                    </div>
+
+                    <!-- Agent 2 -->
+                    <div class="agent-node glass-card" id="agent-2">
+                        <div class="agent-status-pulse"></div>
+                        <div class="agent-icon-box bg-green-trans">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg>
+                        </div>
+                        <h4 class="agent-title text-mono">02. Chart Renderer</h4>
+                        <div class="agent-details">
+                            <span class="detail-tag text-mono">Anti-aliasing Engine</span>
+                            <span class="detail-tag text-mono">Matplotlib/Canvas</span>
+                        </div>
+                        <p class="agent-body-desc">Transforms temporal numerical stock sequences into sharp high-contrast structural graphical chart layouts.</p>
+                    </div>
+
+                    <!-- Agent 3 -->
+                    <div class="agent-node glass-card" id="agent-3">
+                        <div class="agent-status-pulse"></div>
+                        <div class="agent-icon-box bg-blue-trans">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="3" fill="#00e5ff"/></svg>
+                        </div>
+                        <h4 class="agent-title text-mono">03. Pattern Vision</h4>
+                        <div class="agent-details">
+                            <span class="detail-tag text-mono">Vision AI Engine</span>
+                            <span class="detail-tag text-mono">Multi-Shape Scan</span>
+                        </div>
+                        <p class="agent-body-desc">Executes computer vision scans over charts to detect structural targets like Cup & Handles or Flags.</p>
+                    </div>
+
+                    <!-- Agent 4 -->
+                    <div class="agent-node glass-card" id="agent-4">
+                        <div class="agent-status-pulse"></div>
+                        <div class="agent-icon-box bg-green-trans">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                        </div>
+                        <h4 class="agent-title text-mono">04. Signal Validator</h4>
+                        <div class="agent-details">
+                            <span class="detail-tag text-mono">Volume Profile Filter</span>
+                            <span class="detail-tag text-mono">Order Book Confirm</span>
+                        </div>
+                        <p class="agent-body-desc">Validates signals against volume breakouts, market depth and historical structural support and resistance levels.</p>
+                    </div>
+
+                    <!-- Agent 5 -->
+                    <div class="agent-node glass-card" id="agent-5">
+                        <div class="agent-status-pulse"></div>
+                        <div class="agent-icon-box bg-blue-trans">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <h4 class="agent-title text-mono">05. Compliance Agent</h4>
+                        <div class="agent-details">
+                            <span class="detail-tag text-mono">SEBI Guard Checks</span>
+                            <span class="detail-tag text-mono">Audit Log Lock</span>
+                        </div>
+                        <p class="agent-body-desc">Ensures scanning operations strictly conform to SEBI guidelines. Signs signals and writes proof to the audit logs.</p>
+                    </div>
+                </div>
+
+                <!-- Agent Live Console Logs Terminal -->
+                <div class="terminal-logs-wrapper">
+                    <div class="terminal-log-header">
+                        <div class="terminal-dots">
+                            <span class="terminal-dot red"></span>
+                            <span class="terminal-dot yellow"></span>
+                            <span class="terminal-dot green"></span>
+                        </div>
+                        <span class="terminal-title text-mono text-cyan">SPIDER_AI_SCANNER_PIPELINE.LOG</span>
+                        <div class="terminal-badge pulse-green text-mono">SYS_RUNNING</div>
+                    </div>
+                    <div class="terminal-log-body text-mono" id="log-viewport">
+                        <!-- Filled in real-time by JS -->
+                        <div class="log-row info"><span class="log-time">[11:20:01]</span> <span class="log-tag">[SYSTEM]</span> Initializing NSE level-3 live raw ticks feed...</div>
+                        <div class="log-row success"><span class="log-time">[11:20:02]</span> <span class="log-tag">[AGENT_01]</span> Connected to NSE feed. Normalizing OHLCV structures...</div>
+                        <div class="log-row info"><span class="log-time">[11:20:03]</span> <span class="log-tag">[AGENT_02]</span> Ready to receive candlestick intervals for rendering.</div>
+                        <div class="log-row info"><span class="log-time">[11:20:03]</span> <span class="log-tag">[AGENT_03]</span> Vision LLM scanner system calibrated. Initializing cognitive neural maps.</div>
+                        <div class="log-row info"><span class="log-time">[11:20:04]</span> <span class="log-tag">[AGENT_04]</span> Dynamic order depth validator online. Standardizing breakout volumes.</div>
+                        <div class="log-row success"><span class="log-time">[11:20:05]</span> <span class="log-tag">[AGENT_05]</span> SEBI regulation filter set. Secure cryptographic audit logs activated.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Trading Terminal Section -->
+        <section class="terminal-section container" id="dashboard">
+            <div class="section-header text-center">
+                <span class="section-tag text-mono text-green">LIVE SCAN FEEDS</span>
+                <h3 class="section-title text-glow">Real-Time Pattern Terminal</h3>
+                <p class="section-subtitle">
+                    Track AI Vision detections. Click any signal card in the scanner stream to inspect the active candlestick chart and review detailed agent validations.
+                </p>
+            </div>
+
+            <!-- Terminal Main UI Grid -->
+            <div class="terminal-ui-layout">
+                
+                <!-- Left Sidebar: Filters and Signals List -->
+                <div class="terminal-sidebar glass-card">
+                    <div class="sidebar-header">
+                        <div class="sidebar-title-row">
+                            <h4 class="text-mono text-glow">LIVE SIGNAL SCRAP</h4>
+                            <div class="live-pulse-badge">
+                                <span class="pulse-dot-green"></span>
+                                <span class="text-mono font-xs">WS STREAM</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Search & filter bar -->
+                        <div class="filter-controls-row">
+                            <input type="text" id="signal-search" class="terminal-input text-mono" placeholder="Filter symbol (e.g. TCS)...">
+                            <select id="signal-filter" class="terminal-select text-mono">
+                                <option value="ALL">ALL PATTERNS</option>
+                                <option value="Cup & Handle">Cup & Handle</option>
+                                <option value="Bull Flag">Bull Flag</option>
+                                <option value="Double Bottom">Double Bottom</option>
+                                <option value="Ascending Triangle">Ascending Triangle</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Live Signal Cards Container -->
+                    <div class="signals-cards-list" id="signals-list-box">
+                        <!-- Loaded dynamically via JS. Include some initial mockups which act as skeletons or initial items -->
+                        <div class="signal-card-skeleton">
+                            <div class="skeleton-line-long animate-pulse-op"></div>
+                            <div class="skeleton-line-short animate-pulse-op"></div>
+                            <div class="skeleton-chart animate-pulse-op"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Comprehensive Analytics and Interactive Chart View -->
+                <div class="terminal-main-display glass-card" id="central-chart-display">
+                    <div class="terminal-main-header">
+                        <div class="selected-stock-info">
+                            <span class="selected-ticker text-glow font-title" id="chart-title">RELIANCE</span>
+                            <span class="selected-pattern-tag text-mono text-cyan" id="chart-pattern">Cup & Handle Pattern</span>
+                            <div class="signal-direction-badge buy" id="chart-badge">BUY</div>
+                        </div>
+                        <div class="chart-header-metrics text-mono">
+                            <div class="header-met">
+                                <span class="lbl font-xs">CONFIDENCE</span>
+                                <span class="val text-green" id="chart-confidence">87%</span>
+                            </div>
+                            <div class="header-met border-left">
+                                <span class="lbl font-xs">TIMING</span>
+                                <span class="val text-cyan" id="chart-time-val">11:18:42</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Core Chart Element -->
+                    <div class="main-chart-wrapper">
+                        <!-- Interactive Canvas -->
+                        <canvas id="main-terminal-canvas"></canvas>
+                        
+                        <!-- Vision Scanning overlay animation lines -->
+                        <div class="vision-scan-overlay" id="vision-scan-line">
+                            <div class="scan-glow-line"></div>
+                            <div class="scan-status-text text-mono">VISION_AI_COGNITIVE_SCAN_ACTIVE</div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Details and Action Bar -->
+                    <div class="chart-details-panel">
+                        <div class="prices-strip text-mono">
+                            <div class="price-cell">
+                                <span class="lbl font-xs">ENTRY PRICE</span>
+                                <span class="val text-white" id="chart-entry">₹2,845.50</span>
+                            </div>
+                            <div class="price-cell">
+                                <span class="lbl font-xs font-bold text-green">TARGET PRICE</span>
+                                <span class="val text-green" id="chart-target">₹2,990.00</span>
+                            </div>
+                            <div class="price-cell">
+                                <span class="lbl font-xs font-bold text-red">STOP LOSS</span>
+                                <span class="val text-red" id="chart-stop">₹2,790.00</span>
+                            </div>
+                            <div class="price-cell">
+                                <span class="lbl font-xs">RISK / REWARD</span>
+                                <span class="val text-cyan" id="chart-rr">1 : 2.6</span>
+                            </div>
+                        </div>
+
+                        <!-- Multi-Agent Audit Seals on this specific signal -->
+                        <div class="agent-approvals-row">
+                            <div class="audit-row-title text-mono">AGENT APPROVAL SIGNATURES:</div>
+                            <div class="agent-badges-group">
+                                <div class="agent-seal green" title="Data normalized successfully">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                    <span class="text-mono">INGEST_OK</span>
+                                </div>
+                                <div class="agent-seal green" title="High DPI Candlestick generated">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                    <span class="text-mono">RENDER_OK</span>
+                                </div>
+                                <div class="agent-seal green" title="Vision pattern recognized">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                    <span class="text-mono">VISION_OK</span>
+                                </div>
+                                <div class="agent-seal green" title="Volume spiked and breakout confirmed">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                    <span class="text-mono">VALIDATOR_OK</span>
+                                </div>
+                                <div class="agent-seal cyan" title="SEBI guidance met & audit logged">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    <span class="text-mono">COMPLIANCE_SECURED</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Features Section -->
+        <section class="features-section container" id="features">
+            <div class="section-header text-center">
+                <span class="section-tag text-mono text-cyan">PLATFORM CAPABILITIES</span>
+                <h3 class="section-title text-glow">State-of-the-Art Feature Set</h3>
+                <p class="section-subtitle">
+                    Power Bull combines rapid computational speed with artificial neural vision capabilities to give institutional investors structural breakout data ahead of global market feeds.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card glass-card">
+                    <div class="feature-glow-border"></div>
+                    <div class="feature-icon bg-cyan-trans">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <h4 class="feature-title">Vision AI Pattern Recognition</h4>
+                    <p class="feature-desc">Utilizes visual deep learning neural networks to analyze dynamic geometric shape formations on candlestick structures directly, matching shapes instead of lag indicators.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card glass-card">
+                    <div class="feature-glow-border"></div>
+                    <div class="feature-icon bg-green-trans">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><path d="M23 12a11 11 0 1 1-22 0 11 11 0 0 1 22 0z"/><path d="M12 7v5l3 3"/></svg>
+                    </div>
+                    <h4 class="feature-title">Real-Time WebSocket Streaming</h4>
+                    <p class="feature-desc">Delivers instant buy-and-sell triggers over low-overhead WebSockets. Never miss institutional breakouts due to standard rendering and processing lag.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card glass-card">
+                    <div class="feature-glow-border"></div>
+                    <div class="feature-icon bg-cyan-trans">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h4 class="feature-title">Multi-Agent Architecture</h4>
+                    <p class="feature-desc">Distributes processing across 5 highly optimized computational agents working cooperatively to ingest, render, detect, validate, and audit signal patterns seamlessly.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card glass-card">
+                    <div class="feature-glow-border"></div>
+                    <div class="feature-icon bg-green-trans">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h4 class="feature-title">SEBI Compliance Layer</h4>
+                    <p class="feature-desc">A highly resilient regulatory system checking each scan against guidelines. Strictly operates as informational advisory scanner without automated order executions.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card glass-card">
+                    <div class="feature-glow-border"></div>
+                    <div class="feature-icon bg-cyan-trans">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <h4 class="feature-title">Audit Trail Logging</h4>
+                    <p class="feature-desc">Ensures complete traceability by sealing all raw OHLCV tick logs, vision weights, volume graphs, and agent validation responses into an un-alterable secure archive.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card glass-card">
+                    <div class="feature-glow-border"></div>
+                    <div class="feature-icon bg-green-trans">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    </div>
+                    <h4 class="feature-title">Lightning Screener</h4>
+                    <p class="feature-desc">Provides lightning-fast search criteria matching based on stock index, pattern probability thresholds, volume thresholds, and risk-to-reward metrics.</p>
+                </div>
+
+                <!-- Feature 7 -->
+                <div class="feature-card glass-card">
+                    <div class="feature-glow-border"></div>
+                    <div class="feature-icon bg-cyan-trans">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    </div>
+                    <h4 class="feature-title">Historical Signal Playback</h4>
+                    <p class="feature-desc">Analyze performance metrics through graphical backtesting modes. Playback historical pattern scans step-by-step with synchronized tick logs.</p>
+                </div>
+
+                <!-- Feature 8 -->
+                <div class="feature-card glass-card">
+                    <div class="feature-glow-border"></div>
+                    <div class="feature-icon bg-green-trans">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+                    </div>
+                    <h4 class="feature-title">Risk/Reward Analysis</h4>
+                    <p class="feature-desc">Intelligently projects optimal stop-losses and multi-stage price targets according to the detected pattern dimensions, local market volatility, and support layers.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Stack Section -->
+        <section class="tech-stack-section container" id="tech">
+            <div class="section-header text-center">
+                <span class="section-tag text-mono text-cyan">SYSTEM INFRASTRUCTURE</span>
+                <h3 class="section-title text-glow">High-Performance Core Stack</h3>
+                <p class="section-subtitle">
+                    Crafted with extreme emphasis on data ingestion speeds, deep visual scanning capabilities, and ultra-secure transaction auditing configurations.
+                </p>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card glass-card">
+                    <div class="tech-icon-container python">
+                        <span class="text-glow">Python</span>
+                    </div>
+                    <h4 class="tech-name">FastAPI Core</h4>
+                    <p class="tech-desc">Provides the highly scalable asynchronous backplane for routing WS streams and handling heavy JSON signals payload.</p>
+                </div>
+
+                <div class="tech-card glass-card">
+                    <div class="tech-icon-container postgres">
+                        <span class="text-glow">PostgreSQL</span>
+                    </div>
+                    <h4 class="tech-name">TimescaleDB</h4>
+                    <p class="tech-desc">Handles hyper-dense, hyper-fast time series stock raw tick files and transactional logs, optimizing sub-millisecond retrieval query speeds.</p>
+                </div>
+
+                <div class="tech-card glass-card">
+                    <div class="tech-icon-container redis">
+                        <span class="text-glow">Redis</span>
+                    </div>
+                    <h4 class="tech-name">Redis Streams</h4>
+                    <p class="tech-desc">Acts as the ultra-low latency temporal pub/sub pipeline buffering real-time raw NSE ticks feed directly into our multi-agent queues.</p>
+                </div>
+
+                <div class="tech-card glass-card">
+                    <div class="tech-icon-container vision">
+                        <span class="text-glow">Vision AI</span>
+                    </div>
+                    <h4 class="tech-name">Vision LLM APIs</h4>
+                    <p class="tech-desc">Directs raw pixel analysis of candlestick graphs to recognize geometrical setups before typical indicator lines intersect.</p>
+                </div>
+
+                <div class="tech-card glass-card">
+                    <div class="tech-icon-container docker">
+                        <span class="text-glow">Docker</span>
+                    </div>
+                    <h4 class="tech-name">Kubernetes + Docker</h4>
+                    <p class="tech-desc">Containerizes our distinct scanning agents into auto-scaling nodes, maintaining absolute modular separation and high operational availability.</p>
+                </div>
+
+                <div class="tech-card glass-card">
+                    <div class="tech-icon-container ws">
+                        <span class="text-glow">WS</span>
+                    </div>
+                    <h4 class="tech-name">WebSockets</h4>
+                    <p class="tech-desc">Guarantees lightning-fast data propagation from the compliance validation node straight down into live investor displays without delays.</p>
+                </div>
+
+                <div class="tech-card glass-card">
+                    <div class="tech-icon-container cloudflare">
+                        <span class="text-glow">CDN</span>
+                    </div>
+                    <h4 class="tech-name">Cloudflare Enterprise</h4>
+                    <p class="tech-desc">Defends critical APIs against DDoS threats and speeds up static components through globally distributed caching edge servers.</p>
+                </div>
+
+                <div class="tech-card glass-card">
+                    <div class="tech-icon-container js">
+                        <span class="text-glow">Vanilla JS</span>
+                    </div>
+                    <h4 class="tech-name">Institutional Dashboard</h4>
+                    <p class="tech-desc">A highly efficient, single-bundle, vanilla JS-powered terminal engineered for extremely responsive visuals and sub-microsecond DOM render latencies.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Preview Section -->
+        <section class="api-section container" id="api">
+            <div class="section-header text-center">
+                <span class="section-tag text-mono text-cyan">DEVELOPER INTEGRATION</span>
+                <h3 class="section-title text-glow">Real-Time Pattern Scanning APIs</h3>
+                <p class="section-subtitle">
+                    Power your algorithmic trading scripts, institutional terminals, and quantitative models with our high-speed, SEBI-compliant Vision AI signals feed.
+                </p>
+            </div>
+
+            <div class="api-grid glass-card">
+                <!-- Route selection column -->
+                <div class="api-selectors">
+                    <h4 class="text-mono text-cyan selectors-title">AVAILABLE ENDPOINTS</h4>
+                    <button class="api-route-btn active" data-endpoint="today-signals">
+                        <span class="method get">GET</span>
+                        <span class="route text-mono">/api/v1/signals/today</span>
+                    </button>
+                    <button class="api-route-btn" data-endpoint="screener">
+                        <span class="method get">GET</span>
+                        <span class="route text-mono">/api/v1/stocks/screener</span>
+                    </button>
+                    <button class="api-route-btn" data-endpoint="ws-signals">
+                        <span class="method ws">WS</span>
+                        <span class="route text-mono">/signals</span>
+                    </button>
+                    
+                    <div class="api-sandbox-runner">
+                        <button class="btn btn-primary btn-sm btn-glow text-mono" id="run-mock-api">
+                            <span>RUN MOCK CALL</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live response code output column -->
+                <div class="api-display">
+                    <div class="api-display-header">
+                        <span class="text-mono text-green font-xs" id="api-status-badge">STATUS: 200 OK</span>
+                        <span class="text-mono font-xs" id="api-time-badge">RESPONSE TIME: 14ms</span>
+                    </div>
+                    <div class="api-code-body">
+                        <pre><code class="text-mono" id="api-code-block">
+{
+  "status": "success",
+  "data": {
+    "timestamp": "2026-05-27T11:20:25Z",
+    "signals_scanned": 204,
+    "signals": [
+      {
+        "symbol": "RELIANCE",
+        "direction": "BUY",
+        "pattern": "Cup & Handle",
+        "confidence": 0.87,
+        "entry": 2845.50,
+        "target": 2990.00,
+        "stop_loss": 2790.00,
+        "verified_by_agents": ["DataIngestion", "ChartRenderer", "PatternVision", "SignalValidator", "Compliance"]
+      }
+    ]
+  }
+}
+                        </code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Compliance / SEBI Guard Section -->
+        <section class="compliance-section container" id="compliance">
+            <div class="compliance-shield-box glass-card">
+                <div class="shield-glow-border"></div>
+                <div class="compliance-grid">
+                    <div class="compliance-visual">
+                        <div class="shield-hexagon-wrapper">
+                            <svg viewBox="0 0 100 100" class="shield-svg">
+                                <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" class="shield-poly" fill="none" stroke="url(#shield-grad)" stroke-width="4"/>
+                                <path d="M35,50 L45,60 L65,40" stroke="#00ff66" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                                <defs>
+                                    <linearGradient id="shield-grad" x1="0" y1="0" x2="100" y2="100">
+                                        <stop stop-color="#00e5ff"/>
+                                        <stop offset="1" stop-color="#00ff66"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="shield-scanner-line"></div>
+                        </div>
+                        <div class="compliance-badge text-mono">SEBI SECURED</div>
+                    </div>
+                    
+                    <div class="compliance-text">
+                        <span class="text-mono text-cyan font-bold block mb-xs">REGULATORY AUDIT REPORT</span>
+                        <h3 class="compliance-headline">SEBI Registered Research Analyst</h3>
+                        <p class="compliance-reg-number text-mono">REGISTRATION NO: <span class="text-green text-glow">INH200001483</span></p>
+                        
+                        <div class="compliance-points">
+                            <div class="comp-point">
+                                <div class="comp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                                <div>
+                                    <h5 class="text-white">Strict Advisory Framework</h5>
+                                    <p class="font-xs">All AI signals generated by our cooperative multi-agent structures are strictly for informational scan and visual chart education purposes. No direct transaction order executions are provided.</p>
+                                </div>
+                            </div>
+                            <div class="comp-point">
+                                <div class="comp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00ff66" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                                <div>
+                                    <h5 class="text-white">Tamper-Proof Audit Seals</h5>
+                                    <p class="font-xs">Every computer vision weight distribution, detected candle structure coordinates, and transaction validator response is signed and archived securely for state auditing.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="compliance-legal-disclaimer font-xxs text-mono mt-sm">
+                            Disclaimer: Investment in securities market are subject to market risks. Read all the related documents carefully before investing. Registration granted by SEBI, membership of BASL and certification from NISM in no way guarantee performance of the intermediary or provide any assurance of returns to investors.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Premium Footer -->
+    <footer class="global-footer glass-card">
+        <div class="container footer-content-grid">
+            <div class="footer-brand-side">
+                <div class="footer-logo">
+                    <span class="logo-icon-placeholder text-glow">PB</span>
+                    <span class="logo-text font-title font-bold">POWER BULL</span>
+                </div>
+                <p class="brand-subline mt-xs font-xs">Spider AI Pattern Scanner Terminal. Visual chart breakouts processing at microsecond tick rates.</p>
+                <div class="social-links-row mt-sm">
+                    <a href="#" class="social-icon-btn" aria-label="X">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M4 4l11.733 16h4.267l-11.733 -16z M4 20l6.768 -6.768 M20 4l-6.768 6.768"/></svg>
+                    </a>
+                    <a href="#" class="social-icon-btn" aria-label="GitHub">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    </a>
+                    <a href="#" class="social-icon-btn" aria-label="LinkedIn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M4 2a2 2 0 1 1-2 2 2 2 0 0 1 2-2z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-links-column">
+                <span class="col-title text-mono text-cyan">SCANNER TERMINAL</span>
+                <a href="#agents" class="foot-link">Multi-Agent System</a>
+                <a href="#dashboard" class="foot-link">Live Signals Stream</a>
+                <a href="#features" class="foot-link">Vision AI Core</a>
+                <a href="#api" class="foot-link">Real-time API Docs</a>
+            </div>
+
+            <div class="footer-links-column">
+                <span class="col-title text-mono text-cyan">LEGAL & REGULATORY</span>
+                <a href="#compliance" class="foot-link">SEBI Disclosures</a>
+                <a href="#" class="foot-link">Terms of Service</a>
+                <a href="#" class="foot-link">Privacy Policy</a>
+                <a href="#" class="foot-link">Audit Trail Records</a>
+            </div>
+
+            <div class="footer-links-column contact">
+                <span class="col-title text-mono text-cyan">SUPPORT</span>
+                <p class="font-xs">support@powerbullstocks.com</p>
+                <div class="footer-badge mt-xs">
+                    <span class="badge-lbl font-xxs text-mono text-green">POWERED BY VISION AI</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container footer-bottom-strip border-top text-center mt-md pt-sm">
+            <p class="font-xxs text-mono">© 2026 POWER BULL STOCKS. SPIDER AI TECHNOLOGY LABS. ALL RIGHTS RESERVED.</p>
+        </div>
+    </footer>
+
+    <!-- Spider AI Floating Chat Bubble -->
+    <div class="spider-chat-bubble-wrapper">
+        <button class="spider-chat-bubble active" id="spider-chat-bubble" aria-label="Ask Spider AI">
+            <div class="spider-chat-bubble-pulse"></div>
+            <!-- Cybernetic Bot Icon SVG -->
+            <svg class="spider-chat-bubble-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                <path d="M9 16h6"></path>
+                <path d="M12 14v4"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Spider AI Chat Container -->
+    <div class="spider-chat-container" id="spider-chat-container">
+        <!-- Chat Header -->
+        <header class="chat-header">
+            <div class="chat-header-title-group">
+                <svg class="chat-header-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="3" fill="currentColor"></circle>
+                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path>
+                </svg>
+                <div class="chat-header-title-text">
+                    <span class="chat-bot-name">SPIDER AI CHATBOT</span>
+                    <span class="chat-bot-status">
+                        <span class="chat-bot-status-dot"></span>
+                        SYS_ONLINE
+                    </span>
+                </div>
+            </div>
+            
+            <div class="chat-header-controls">
+                <!-- Secure API Key Toggle Button -->
+                <button class="chat-control-btn" id="chat-key-toggle-btn" title="Configure Google Gemini API Key">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </button>
+                <!-- Minimize button -->
+                <button class="chat-control-btn" id="chat-minimize-btn" title="Minimize Chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M19 12H5"></path>
+                    </svg>
+                </button>
+                <!-- Close Button -->
+                <button class="chat-control-btn close" id="chat-close-btn" title="Close Chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- API Key Management Panel -->
+        <div class="chat-key-panel" id="chat-key-panel">
+            <h4 class="key-panel-title text-mono">GEMINI_API_NODE_CONFIG</h4>
+            <p class="key-panel-desc">Enter your Gemini API key from Google AI Studio. It is saved locally in your browser and used strictly for REST requests to Google Gemini.</p>
+            <div class="key-input-row">
+                <input type="password" id="api-key-input" class="api-key-input-box" placeholder="Paste AI Studio API Key here...">
+                <button class="btn-key-action save" id="save-key-btn">SAVE</button>
+            </div>
+            <div class="key-status-row text-mono">
+                <span>STATUS:</span>
+                <span class="key-status-indicator inactive" id="key-status-indicator">NO_KEY_SET</span>
+                <button class="btn-key-action delete" id="delete-key-btn">DELETE</button>
+            </div>
+        </div>
+
+        <!-- Chat Viewport Messages List -->
+        <div class="chat-messages-viewport" id="chat-messages-viewport">
+            <!-- Welcome Introduction Card -->
+            <div class="chat-welcome-card">
+                <h5 class="chat-welcome-title">Spider AI Technical Assistant</h5>
+                <p class="chat-welcome-text">
+                    Welcome to the pattern analyst nodes. I am directly connected to the active computer vision scanner feed. Select any stock card on your dashboard to load it into my dynamic memory!
+                </p>
+                <div class="chat-welcome-features">
+                    <div class="chat-welcome-feature-item">
+                        <span class="feature-bullet">&gt;</span> Explain visual geometric chart patterns.
+                    </div>
+                    <div class="chat-welcome-feature-item">
+                        <span class="feature-bullet">&gt;</span> Verify entry targets and stop loss configurations.
+                    </div>
+                    <div class="chat-welcome-feature-item">
+                        <span class="feature-bullet">&gt;</span> Analyze SEBI compliance and regulatory advisory safeguards.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Card when key is missing -->
+            <div class="missing-key-warning-card visible" id="api-key-missing-warning">
+                <h5 class="warning-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"></path>
+                    </svg>
+                    API Key Configuration Required
+                </h5>
+                <p class="warning-card-text">
+                    A free Google Gemini API Key is required to authorize the generative neural models. Get a free key from Google AI Studio and configure it using the API key panel above.
+                </p>
+                <a href="https://aistudio.google.com/" target="_blank" class="btn-get-key text-mono">
+                    <span>GET FREE KEY AT AI STUDIO</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Dynamic Chat Suggestion Chips -->
+        <div class="chat-suggestions-wrapper">
+            <div class="chat-suggestion-chips" id="chat-suggestion-chips">
+                <!-- Auto-populated based on active scanner context -->
+            </div>
+        </div>
+
+        <!-- Chat Input Footer -->
+        <footer class="chat-input-wrapper">
+            <input type="text" id="chat-input-field" class="chat-input-field" placeholder="Ask Spider AI analyst..." disabled>
+            <button class="chat-input-send-btn" id="chat-send-btn" title="Send message" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </footer>
+    </div>
+
+    <!-- Core App JS -->
+    <script src="app.js"></script>
+    <!-- Chatbot script -->
+    <script src="chatbot.js"></script>
+</body>
+</html>
